@@ -23,57 +23,48 @@ function matrix_diag_elem(M::Float64, Ω::Float64, C_3::Float64, i_index::Int, j
 end
 
 function calculate_matrix2d(N_x::Int, N_y::Int, M::Float64, Ω::Float64, C_3::Float64, rand_rng::Float64)
-	rand_matrix = 2 * rand_rng * rand(Float16, N_x, N_y, 2) .- rand_rng  #matrix of random displacements
-    result_matrix_diag = zeros(Float64, N_x*N_y, N_x*N_y)			#preparing matrix of zeros for diag elems
+	rand_matrix = 2 * rand_rng * rand(Float16, N_x, N_y, 2) .- rand_rng
+    result_matrix_diag = zeros(Float64, N_x*N_y, N_x*N_y)
     diag_ind = 1
     for i in 1:N_x
         for j in 1:N_y
-            #println("diagind=", diag_ind, "x=", i, "y=", j)
-            result_matrix_diag[diag_ind,diag_ind] = matrix_diag_elem(M, Ω, C_3, i, j, N_x, N_y, rand_matrix) #calculating diagonal element
+            result_matrix_diag[diag_ind, diag_ind] = matrix_diag_elem(M, Ω, C_3, i, j, N_x, N_y, rand_matrix)
             diag_ind += 1
         end
     end
-    result_matrix_upper = zeros(N_x * N_y, N_x * N_y)			#calculating upper half of the matrix
-    # Iterate through all pairs of indices
+    result_matrix_upper = zeros(N_x * N_y, N_x * N_y)
     for row_index in 1:N_x * N_y
-        # Convert row index to (i, j) in the original matrix
         i, j = divrem(row_index - 1, N_x)
         i += 1
         j += 1
         for col_index in (row_index + 1):(N_x * N_y)
-            # Convert column index to (k, l) in the original matrix
-            k, l = divrem(col_index - 1, N_y)
+            k, l = divrem(col_index - 1, N_x)
             k += 1
             l += 1
             dist = sqrt(
-                ((i-1)*a + rand_matrix[i, j, 1] - (k-1)*a - rand_matrix[k, l, 1])^2
+                ((i-1)*a + rand_matrix[j, i, 1] - (k-1)*a - rand_matrix[l, k, 1])^2 # Δx^2
                 +
-                ((j-1)*a + rand_matrix[i, j, 2] - (l-1)*a - rand_matrix[k, l, 2])^2
+                ((j-1)*a + rand_matrix[j, i, 2] - (l-1)*a - rand_matrix[l, k, 2])^2 # Δy^2
 			)
-            println("[i,j] = [$i,$j]\t [k,l] = [$k, $l]\t [col,row] = [$col_index,$row_index]\tdist = $dist")
-            result_matrix_upper[col_index, row_index] = dist#^-5
+            result_matrix_upper[row_index, col_index] = dist^(-5)
         end
     end
-	printstyled("Half of matrix\n", color=:red, bold=true)
-	display(result_matrix_upper)
-	printstyled("Diagonal elements\n", color=:red, bold=true)
-	display(result_matrix_diag)
     return result_matrix_diag .+ result_matrix_upper .+ transpose(result_matrix_upper)
 end
 ################################################################################
 
-N_x = 2
-N_y = 3
+N_x = 5
+N_y = 7
 a = 1.1
 M = 1.0
 Ω = 1.0
 C_3 = 1.5
-rand_rng = 0.0
+rand_rng = 0.3
 
 result_matrix = calculate_matrix2d(N_x, N_y, M, Ω, C_3, rand_rng)
 
 scatter(eigvals(result_matrix), title="Eigenvalues: 2D, size: $N_x x $N_y, δR=$rand_rng, OBC", framestyle = :box)
-#eigvals(result_matrix)
+
 ################################################################################
 #	N_x, N_y	- size of the system
 #	a 			- lattice constant
