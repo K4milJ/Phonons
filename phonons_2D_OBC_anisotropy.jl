@@ -164,17 +164,15 @@ end
 ################################################################################
 
 #result_matrix = calculate_matrix2d(N_x, N_y, M, Ω, C_3, a, rand_rng)
-result_matrix = calculate_matrix2d(4, 4, 1.0, 1.0, 1.5, 1.1, 0.0)
+result_matrix = calculate_matrix2d(10, 10, 1.0, 1.0, 1.5, 1.1, 0.0)
 eigvals(result_matrix)
-ev = Plots.scatter(eigvals(result_matrix), framestyle = :box, legend=:none)
-save("plots/phonon_mode_1_square_OBC_4x4_eigvals.png", ev) 
+#Plots.scatter(eigvals(result_matrix), title="Eigenvalues: 2D, size: $N_x x $N_y, δR=$rand_rng, OBC", framestyle = :box)
 #evec = eigvecs(result_matrix)
 
 #visualize_phonon_mode(result_matrix::Matrix{Float64}, N_x::Int, N_y::Int, a::Float32, mode_index::Int)
-f = visualize_phonon_mode(result_matrix, 4, 4, 1.1, 1)
-save("plots/phonon_mode_1_square_OBC_4x4.png", f)  # Optional: Save the figure
+f = visualize_phonon_mode(result_matrix, 10, 10, 1.1, 4)
+#save("phonon_mode_4.png", f)  # Optional: Save the figure
 
-#=
 for mass in 1.0:0.01:2.0
 	println("mass = ", mass)
 	mx = calculate_matrix2d(10, 10, 1.0, mass, 1.5, 1.1, 0.0);
@@ -182,4 +180,3 @@ for mass in 1.0:0.01:2.0
 	display(f)
 	sleep(0.1)
 end
-=#
