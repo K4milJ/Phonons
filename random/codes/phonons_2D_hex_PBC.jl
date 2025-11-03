@@ -243,7 +243,7 @@ lattice_plt = Plots.scatter(x_comp, y_comp, title="",
 function lattice_display!(positions, plt, N_x::Int, N_y::Int, a::Float64) #to be finished
 	for i in 1:N_x, j in 1:N_y-1
 		println("[x,y]=[$i,$j]");
-		plot!([positions[j, i, 1], positions[j+1, i, 1]], [positions[j, i, 2], positions[j+1, i, 2]]; color=:gray, lw=1, label="")
+		Plots.plot!([positions[j, i, 1], positions[j+1, i, 1]], [positions[j, i, 2], positions[j+1, i, 2]]; color=:gray, lw=1, label="")
 	end
 	#=
 	for i in 1:N_x-1
@@ -259,6 +259,7 @@ end
 
 lattice_plt = lattice_display!(test_pos, lattice_plt, 4, 6, 1.0)
 display(lattice_plt)
+#lattice display, not finished
 ################################################################################
 #now we can implement our structure from square lattice, only distances will be
 #calculated from our new matrix of positions

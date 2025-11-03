@@ -143,7 +143,7 @@ using Plots
 nseg = 50
 path = generate_k_path(a, nseg)
 #checking path
-scatter(path[1, :], path[2, :], aspect_ratio=:equal)
+Plots.scatter(path[1, :], path[2, :], aspect_ratio=:equal)
 
 #checking results, Re, Im and Abs
 eigvals_list = D_eigvals.(path[1, :], path[2, :])
@@ -165,13 +165,13 @@ dq = [0.0; cumsum(sqrt.(sum(diff(path, dims=2).^2, dims=1))[:])]
 xticks_pos = [dq[1], dq[nseg+1], dq[2nseg+1], dq[end]]
 xticks_labels = ["K", "M", "Γ", "K"]
 
-plot(dq, bands', xlabel="k-path", ylabel="Eigenvalues Re()", label="", lw=2,
+Plots.plot(dq, bands', xlabel="k-path", ylabel="Eigenvalues Re()", label="", lw=2,
      xticks=(xticks_pos, xticks_labels), title="Band structure along high-symmetry path", color=:blue)
 
-plot(dq, bandsi', xlabel="k-path", ylabel="Eigenvalues Im()", label="", lw=2,
+Plots.plot(dq, bandsi', xlabel="k-path", ylabel="Eigenvalues Im()", label="", lw=2,
      xticks=(xticks_pos, xticks_labels), title="Band structure along high-symmetry path", color=:orange)
 
-plot(dq, bandabs', xlabel="k-path", ylabel="Eigenvalues abs()", label="", lw=2,
+Plots.plot(dq, bandabs', xlabel="k-path", ylabel="Eigenvalues abs()", label="", lw=2,
      xticks=(xticks_pos, xticks_labels), title="Band structure along high-symmetry path", color=:green)
 
 #################################################################

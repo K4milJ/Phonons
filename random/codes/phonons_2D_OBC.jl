@@ -1,4 +1,12 @@
-#calculating the distance in 1D lattice OBC
+################################################################################
+# 2D system - size: N_x*N_y, OBC, +[δR_x, δR_y]
+################################################################################
+
+using Plots
+using LinearAlgebra
+using CairoMakie
+
+#calculating the distance in 1D
 function distance_1D(x1::Int, x2::Int, N::Int, a::Float64)
 	L = N * a
 	x1 *= a
@@ -6,7 +14,7 @@ function distance_1D(x1::Int, x2::Int, N::Int, a::Float64)
 	return abs(x2 - x1)
 end
 
-#calculating the distance in 2D lattice OBC
+#calculating the distance in 2D
 function distance_2D(atom1::Tuple{Int, Int}, 
 	atom2::Tuple{Int, Int}, 
 	a::Float64, N_x::Int, N_y::Int) 
@@ -159,9 +167,19 @@ end
 result_matrix = calculate_matrix2d(4, 4, 1.0, 1.0, 1.5, 1.1, 0.0)
 eigvals(result_matrix)
 ev = Plots.scatter(eigvals(result_matrix), framestyle = :box, legend=:none)
-# save("plots/phonon_mode_1_square_OBC_4x4_eigvals.png", ev) 
+save("plots/phonon_mode_1_square_OBC_4x4_eigvals.png", ev) 
 #evec = eigvecs(result_matrix)
 
 #visualize_phonon_mode(result_matrix::Matrix{Float64}, N_x::Int, N_y::Int, a::Float32, mode_index::Int)
 f = visualize_phonon_mode(result_matrix, 4, 4, 1.1, 1)
 save("plots/phonon_mode_1_square_OBC_4x4.png", f)  # Optional: Save the figure
+
+#=
+for mass in 1.0:0.01:2.0
+	println("mass = ", mass)
+	mx = calculate_matrix2d(10, 10, 1.0, mass, 1.5, 1.1, 0.0);
+	f = visualize_phonon_mode(mx, 10, 10, 1.1, 1)
+	display(f)
+	sleep(0.1)
+end
+=#

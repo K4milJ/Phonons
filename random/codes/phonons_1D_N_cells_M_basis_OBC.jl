@@ -93,7 +93,11 @@ quiver!(positions, zeros(N), quiver=(disp_magnitudes, zeros(N)), arrow=true, lin
 # Optional: add title
 title!("Phonon mode $mode_index")
 
-##########
+
+
+#######################################
+## 2D case - test - random positions ##
+#######################################
 using LinearAlgebra
 using Plots
 
@@ -134,7 +138,13 @@ quiver!(X, Y, quiver=(DX, DY), arrow=true, lw=2, color=:red)
 
 title!("Phonon mode $mode_index (2D)")
 
-#############
+
+
+
+
+#######################################
+## 2D case                           ##
+#######################################
 using LinearAlgebra
 using CairoMakie
 
@@ -167,12 +177,12 @@ f = Figure()
 ax = Axis(f[1, 1]; aspect=DataAspect(), xlabel="x", ylabel="y")
 
 # Plot atoms
-scatter!(ax, positions; markersize=10, color=:black);
+CairoMakie.scatter!(ax, positions; markersize=10, color=:black);
 
 # Plot displacement arrows
 arrows!(ax, positions, disp_scaled; arrowsize=10, linewidth=2, color=:blue);
 
-title!(ax, "Phonon Mode $mode_index on Square Lattice");
+CairoMakie.title!(ax, "Phonon Mode $mode_index on Square Lattice");
 
 f
 
