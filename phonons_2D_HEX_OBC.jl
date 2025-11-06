@@ -3,59 +3,13 @@ using LinearAlgebra
 using CairoMakie
 
 """
-	distance_1D(x1::Int, x2::Int, N::Int, a::Float64)
-
-Compute the scalar distance between two sites on a 1D open-boundary lattice.
-
-Arguments
-- x1, x2: integer site indices (1-based) along the 1D chain.
-- N: total number of sites in the chain (keeps API symmetry; not otherwise required).
-- a: lattice constant (spacing between neighbouring sites).
-
-Returns
-- Absolute distance (Float64) between positions x1 and x2.
-"""
-function distance_1D(x1::Int, x2::Int, N::Int, a::Float64)
-	L = N * a
-	x1 *= a
-	x2 *= a
-	return abs(x2 - x1)
-end
-
-"""
-	distance_2D(atom1::Tuple{Int, Int}, atom2::Tuple{Int, Int}, a::Float64)
-
-Compute Euclidean distance between two lattice sites in 2D for open-boundary conditions.
-
-Arguments
-- atom1, atom2: tuples (i, j) of integer grid indices (1-based) that are scaled by `a`.
-- a: lattice constant.
-
-Returns
-- Euclidean distance (Float64) between the two lattice positions.
-"""
-function distance_2D(atom1::Tuple{Int, Int}, 
-	atom2::Tuple{Int, Int}, 
-	a::Float64) 
-	x1, y1 = atom1 .* a
-	x2, y2 = atom2 .* a
-	return sqrt((x2 - x1)^2 + (y2 - y1)^2)
-end
-
-"""
 	sum_of_distances_diag_elem(i_index, j_index, N_x, N_y, positions, direction)
-
-Accumulate the diagonal contribution for a 2×2 element using explicit `positions` array
-for a hexagonal lattice. Uses distance^-5 and distance^-3 terms with angular factors.
 
 Arguments
 - i_index, j_index: integer indices selecting the atom whose diagonal block is computed.
 - N_x, N_y: lattice dimensions.
 - positions: N_y × N_x × 2 array with precomputed Cartesian positions for each site.
 - direction: component selector: "xx", "xy"/"yx", or "yy".
-
-Returns
-- Scalar Float64 used to build the diagonal 2×2 block.
 """
 function sum_of_distances_diag_elem(i_index::Int, j_index::Int, N_x::Int, N_y::Int, positions::Array{Float64}, direction::String)
 	result = 0
@@ -83,17 +37,11 @@ end
 """
 	matrix_diag_elem(M, Ω, C_3, i_index, j_index, N_x, N_y, positions)
 
-Form the 2×2 diagonal block for an atom on the hex lattice using the precomputed
-`positions` array.
-
 Arguments
 - M, Ω, C_3: physical constants (mass, frequency parameter, coupling constant).
 - i_index, j_index: grid indices of the atom.
 - N_x, N_y: grid dimensions.
 - positions: N_y × N_x × 2 array of Cartesian coordinates.
-
-Returns
-- 2×2 Float64 block for the diagonal contribution of the chosen atom.
 """
 function matrix_diag_elem(M::Float64, Ω::Float64, C_3::Float64, i_index::Int, j_index::Int, N_x::Int, N_y::Int, positions::Array{Float64})
 	M_xx = M*Ω^2 - 3*C_3*sum_of_distances_diag_elem(i_index, j_index, N_x, N_y, positions, "xx")
@@ -105,17 +53,11 @@ end
 """
 	sum_of_distances(i_index, j_index, N_x, N_y, positions, direction)
 
-Compute the scalar contribution from interactions between the atom at (i_index, j_index)
-and all other atoms, useful when forming off-diagonal blocks of the dynamical matrix.
-
 Arguments
 - i_index, j_index: indices of the site being considered.
 - N_x, N_y: lattice dimensions.
 - positions: array of Cartesian coordinates (N_y × N_x × 2).
 - direction: "xx", "xy"/"yx", or "yy" specifying component type.
-
-Returns
-- Float64 scalar sum of angular/distance-dependent terms for the chosen component.
 """
 function sum_of_distances(i_index::Int, j_index::Int, N_x::Int, N_y::Int, positions::Array{Float64}, direction::String)
 	result = 0
@@ -141,16 +83,10 @@ end
 """
 	calculate_matrix2d_hex(N_x, N_y, M, Ω, C_3, positions)
 
-Assemble the full dynamical matrix (2N × 2N) for a hexagonal lattice described by
-the provided `positions` array.
-
 Arguments
 - N_x, N_y: lattice grid dimensions.
-- M, Ω, C_3: physical parameters used in diagonal/off-diagonal block assembly.
+- M, Ω, C_3: physical parameters used in diagonal/off-diagonal blocks.
 - positions: N_y × N_x × 2 array of Cartesian coordinates for every lattice site.
-
-Returns
-- Assembled (2*N_x*N_y) × (2*N_x*N_y) Float64 matrix representing the vibrational operator.
 """
 function calculate_matrix2d_hex(N_x::Int, N_y::Int, M::Float64, Ω::Float64, C_3::Float64, positions::Array{Float64})
 	#rand_matrix = 2 * rand_rng * rand(Float16, N_x, N_y, 2) .- rand_rng
@@ -190,53 +126,36 @@ end
 """
 	calculate_positions_hex_PBC(N_x::Int, N_y::Int, a::Float64)
 
-Generate flattened Cartesian positions for a hexagonal (honeycomb-like) arrangement with
-periodic-like spacing (function name indicates PBC but positions are returned in a finite array).
-
 Arguments
 - N_x, N_y: integer grid dimensions (number of sites along x and y used to arrange points).
 - a: lattice constant; vertical spacing uses 0.5 * a * √3 for hex packing.
-
-Returns
-- An N_y × N_x × 2 Float64 array of positions: positions[j, i, 1] = x, positions[j, i, 2] = y.
 """
 function calculate_positions_hex_PBC(N_x::Int, N_y::Int, a::Float64)
-	## temp ##
-	#if (mod(N_x,2) != 0 || mod(N_y,2) != 0)
-	#	println("ERROR - currently this shape of system is not available");
-	#else
-		#println("OK");
-		positions = zeros(N_y,N_x,2)
-		# Y - component:
-		for i in 1:N_x, j in 1:N_y
-			positions[j, i, 2] = (j-1) * 0.5 * a * √3
+	positions = zeros(N_y,N_x,2)
+	# Y - component:
+	for i in 1:N_x, j in 1:N_y
+		positions[j, i, 2] = (j-1) * 0.5 * a * √3
+	end
+	# X - component:
+	for j in 1:N_y
+		if (mod(j,2) == 0)	#even rows
+			#positions[j, :, 1] = [0.5; accumulate(+, repeat([1, 2], ceil(Int, N_x/2))[1:N_x-1]) .+ 0.5]
+			positions[j, :, 1] = [0; accumulate(+, repeat([2, 1], ceil(Int, N_x/2))[1:N_x-1]) .+ 0]
+		else				#odd rows
+			#positions[j, :, 1] = [0; accumulate(+, repeat([2, 1], ceil(Int, N_x/2))[1:N_x-1]) .+ 0]
+			positions[j, :, 1] = [0.5; accumulate(+, repeat([1, 2], ceil(Int, N_x/2))[1:N_x-1]) .+ 0.5]
 		end
-		# X - component:
-		for j in 1:N_y
-			if (mod(j,2) == 0)	#even rows
-				#positions[j, :, 1] = [0.5; accumulate(+, repeat([1, 2], ceil(Int, N_x/2))[1:N_x-1]) .+ 0.5]
-				positions[j, :, 1] = [0; accumulate(+, repeat([2, 1], ceil(Int, N_x/2))[1:N_x-1]) .+ 0]
-			else				#odd rows
-				#positions[j, :, 1] = [0; accumulate(+, repeat([2, 1], ceil(Int, N_x/2))[1:N_x-1]) .+ 0]
-				positions[j, :, 1] = [0.5; accumulate(+, repeat([1, 2], ceil(Int, N_x/2))[1:N_x-1]) .+ 0.5]
-			end
-		end
-	return positions
-	#end
+	end
+return positions
 end
 
 """
 	visualize_phonon_mode_from_positions(result_matrix, positions, mode_index)
 
-Visualize a phonon eigenmode using an explicit `positions` array for arbitrary lattices.
-
 Arguments
 - result_matrix: assembled dynamical/stiffness matrix (2N × 2N).
 - positions: N_x × N_y × 2 array of Cartesian coordinates used to place atoms.
 - mode_index: index of the eigenmode to visualize.
-
-Returns
-- A CairoMakie Figure showing points for atom positions and arrows for displacement vectors.
 """
 function visualize_phonon_mode_from_positions(result_matrix::Matrix{Float64}, positions::Array{Float64, 3}, mode_index::Int)
     N_x, N_y, _ = size(positions)
@@ -277,12 +196,3 @@ f = visualize_phonon_mode_from_positions(result_matrix, test_pos, 1)
 
 ev = Plots.scatter(eigvals(result_matrix), framestyle = :box, legend=:none)
 # save("plots/phonon_mode_1_hex_big_eigvals.png", ev) 
-################################################################################
-
-# Here is rozgrzebany code for visualizing lattice - it doesn't work yet
-
-#Let's plot our lattice to check if everything is fine
-x_comp = vec(test_pos[:,:,1])
-y_comp = vec(test_pos[:,:,2])
-lattice_plt = Plots.scatter(x_comp, y_comp, title="", 
-	aspect_ratio=1, framestyle=:box, legend=:none, color=:blue, yflip=true)
