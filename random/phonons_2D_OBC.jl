@@ -14,12 +14,12 @@ Arguments
 """
 function sum_of_distances_diag_elem(i_index::Int, j_index::Int, N_x::Int, N_y::Int, a::Float64, rand_matrix::Array{Float64}, direction::String)
 	result = 0
-    for x_pos in 1:N_x
-        for y_pos in 1:N_y
-            if (i_index != x_pos && j_index != y_pos)
+	for x_pos in 1:N_x
+		for y_pos in 1:N_y
+			if (i_index != x_pos && j_index != y_pos)
 				dx = ((i_index-1)*a + rand_matrix[i_index, j_index, 1] - (x_pos-1)*a - rand_matrix[x_pos, y_pos, 1])
 				dy = ((j_index-1)*a + rand_matrix[i_index, j_index, 2] - (y_pos-1)*a - rand_matrix[x_pos, y_pos, 2])
-                distance = (sqrt(dx^2 + dy^2))
+				distance = (sqrt(dx^2 + dy^2))
 				if direction == "xx"
 					result += -6 * dx^2 * distance^(-5) + distance^(-3)
 				elseif direction == "xy" || direction == "yx"
@@ -27,9 +27,9 @@ function sum_of_distances_diag_elem(i_index::Int, j_index::Int, N_x::Int, N_y::I
 				elseif direction == "yy"
 					result += -6 * dy^2 * distance^(-5) + distance^(-3)
 				end
-            end
-        end
-    end
+			end
+		end
+	end
 
 	return result
 end

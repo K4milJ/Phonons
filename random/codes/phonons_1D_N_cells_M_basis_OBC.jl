@@ -6,47 +6,47 @@ using Plots
 using LinearAlgebra
 
 function calculate_positions_of_atoms(N_cells::Int, N_basis::Int, interatomic_dist::Vector{Float64})
-    position_vec = zeros(Float64, N_basis*N_cells)  #vector of zeros of size N
-    for i in 2:N_basis*N_cells
-        position_vec[i] = position_vec[i-1] + interatomic_dist[mod1(i-1, N_basis)]
-    end
-    return position_vec
+	position_vec = zeros(Float64, N_basis*N_cells)  #vector of zeros of size N
+	for i in 2:N_basis*N_cells
+		position_vec[i] = position_vec[i-1] + interatomic_dist[mod1(i-1, N_basis)]
+	end
+	return position_vec
 end
 
 function calculate_random_displacement(N_cells::Int, N_basis::Int, rand_rng::Float64)
-    return 2 * rand_rng * rand(Float16, N_basis*N_cells) .- rand_rng 
+	return 2 * rand_rng * rand(Float16, N_basis*N_cells) .- rand_rng 
 end
 
 function sum_of_distances_diag_elem(N_cells::Int, N_basis::Int, i_index::Int, rand_rng::Float64, rand_vec::Vector{Float64})
-    result = 0
-    position_vec = calculate_positions_of_atoms(N_cells, N_basis, interatomic_dist)
-    #rand_vec = calculate_random_displacement(N_cells, N_basis, rand_rng)
-    for i in 1:N_basis*N_cells
-        if (i != i_index) #1/0=Inf
-            result += abs(position_vec[i_index] + rand_vec[i_index] - position_vec[i] - rand_vec[i])^-5
-        end
-    end
-    return result
+	result = 0
+	position_vec = calculate_positions_of_atoms(N_cells, N_basis, interatomic_dist)
+	#rand_vec = calculate_random_displacement(N_cells, N_basis, rand_rng)
+	for i in 1:N_basis*N_cells
+		if (i != i_index) #1/0=Inf
+			result += abs(position_vec[i_index] + rand_vec[i_index] - position_vec[i] - rand_vec[i])^-5
+		end
+	end
+	return result
 end
 
 function diagonal_element(N_cells::Int, N_basis::Int, M::Float64, Ω::Float64, C_3::Float64, i_index::Int, rand_rng::Float64, rand_vec::Vector{Float64})
-    return M*Ω^2 + 12*C_3*sum_of_distances_diag_elem(N_cells, N_basis, i_index, rand_rng, rand_vec)    
+	return M*Ω^2 + 12*C_3*sum_of_distances_diag_elem(N_cells, N_basis, i_index, rand_rng, rand_vec)	
 end
 
 function calculating_matrix(N_cells::Int, N_basis::Int, M::Float64, Ω::Float64, C_3::Float64, rand_rng::Float64, interatomic_dist::Vector{Float64})
-    position_vec = calculate_positions_of_atoms(N_cells, N_basis, interatomic_dist)
-    rand_vec = calculate_random_displacement(N_cells, N_basis, rand_rng)
-    result_matrix_diagonal = zeros(Float64, N_basis*N_cells, N_basis*N_cells) #initiating matrix NxN
-    for i in 1:N_basis*N_cells
-        result_matrix_diagonal[i,i] = diagonal_element(N_cells, N_basis, M, Ω, C_3, i, rand_rng, rand_vec)
-    end 
-    result_matrix_upper_part = zeros(Float64, N_basis*N_cells, N_basis*N_cells) #initializing another matrix
-    for i in 1:N_basis*N_cells
-        for j in i+1:N_basis*N_cells
-            result_matrix_upper_part[i,j] = -12*C_3*abs(position_vec[i] + rand_vec[i] - position_vec[j] - rand_vec[j])^-5
-        end
-    end
-    return result_matrix_upper_part .+ transpose(result_matrix_upper_part) .+ result_matrix_diagonal
+	position_vec = calculate_positions_of_atoms(N_cells, N_basis, interatomic_dist)
+	rand_vec = calculate_random_displacement(N_cells, N_basis, rand_rng)
+	result_matrix_diagonal = zeros(Float64, N_basis*N_cells, N_basis*N_cells) #initiating matrix NxN
+	for i in 1:N_basis*N_cells
+		result_matrix_diagonal[i,i] = diagonal_element(N_cells, N_basis, M, Ω, C_3, i, rand_rng, rand_vec)
+	end 
+	result_matrix_upper_part = zeros(Float64, N_basis*N_cells, N_basis*N_cells) #initializing another matrix
+	for i in 1:N_basis*N_cells
+		for j in i+1:N_basis*N_cells
+			result_matrix_upper_part[i,j] = -12*C_3*abs(position_vec[i] + rand_vec[i] - position_vec[j] - rand_vec[j])^-5
+		end
+	end
+	return result_matrix_upper_part .+ transpose(result_matrix_upper_part) .+ result_matrix_diagonal
 end
 
 ################################################################################
@@ -143,15 +143,15 @@ title!("Phonon mode $mode_index (2D)")
 
 
 #######################################
-## 2D case                           ##
+## 2D case						   ##
 #######################################
 using LinearAlgebra
 using CairoMakie
 
 # ========== Lattice Parameters ==========
-L = 10                    # lattice size (LxL)
-a = 1.0                  # lattice spacing
-N = L^2                  # total atoms
+L = 10					# lattice size (LxL)
+a = 1.0				  # lattice spacing
+N = L^2				  # total atoms
 
 # Generate lattice positions (2D square)
 positions = [Point2f(i*a, j*a) for j in 0:L-1, i in 0:L-1]

@@ -24,13 +24,13 @@ function distance_2D(atom1::Tuple{Int, Int},
 end
 
 function sum_of_distances_diag_elem(M::Float64, Ω::Float64, C_3::Float64, i_index::Int, j_index::Int, N_x::Int, N_y::Int, a::Float64, rand_matrix::Array{Float64}, direction::String)
-    result = 0
-    for x_pos in 1:N_x
-        for y_pos in 1:N_y
-            if (i_index != x_pos && j_index != y_pos)
+	result = 0
+	for x_pos in 1:N_x
+		for y_pos in 1:N_y
+			if (i_index != x_pos && j_index != y_pos)
 				dx = ((i_index-1)*a + rand_matrix[i_index, j_index, 1] - (x_pos-1)*a - rand_matrix[x_pos, y_pos, 1])
 				dy = ((j_index-1)*a + rand_matrix[i_index, j_index, 2] - (y_pos-1)*a - rand_matrix[x_pos, y_pos, 2])
-                distance = (sqrt(dx^2 + dy^2))
+				distance = (sqrt(dx^2 + dy^2))
 				if direction == "xx"
 					result += -6 * dx^2 * distance^(-5) + distance^(-3)
 				elseif direction == "xy" || direction == "yx"
@@ -38,27 +38,27 @@ function sum_of_distances_diag_elem(M::Float64, Ω::Float64, C_3::Float64, i_ind
 				elseif direction == "yy"
 					result += -6 * dy^2 * distance^(-5) + distance^(-3)
 				end
-            end
-        end
-    end
-    return result
+			end
+		end
+	end
+	return result
 end
 
 function matrix_diag_elem(M::Float64, Ω::Float64, C_3::Float64, i_index::Int, j_index::Int, N_x::Int, N_y::Int, a::Float64, rand_matrix::Array{Float64})
-    M_xx = M*Ω^2 - 3*C_3*sum_of_distances_diag_elem(M, Ω, C_3, i_index, j_index, N_x, N_y, a, rand_matrix, "xx")
+	M_xx = M*Ω^2 - 3*C_3*sum_of_distances_diag_elem(M, Ω, C_3, i_index, j_index, N_x, N_y, a, rand_matrix, "xx")
 	M_xy = M*Ω^2 - 3*C_3*sum_of_distances_diag_elem(M, Ω, C_3, i_index, j_index, N_x, N_y, a, rand_matrix, "xy")
 	M_yy = M*Ω^2 - 3*C_3*sum_of_distances_diag_elem(M, Ω, C_3, i_index, j_index, N_x, N_y, a, rand_matrix, "yy")
 	return [M_xx M_xy; M_xy M_yy]
 end
 
 function sum_of_distances(M::Float64, Ω::Float64, C_3::Float64, i_index::Int, j_index::Int, N_x::Int, N_y::Int, a::Float64, rand_matrix::Array{Float64}, direction::String)
-    result = 0
-    for x_pos in 1:N_x
-        for y_pos in 1:N_y
-            if (i_index != x_pos && j_index != y_pos)
+	result = 0
+	for x_pos in 1:N_x
+		for y_pos in 1:N_y
+			if (i_index != x_pos && j_index != y_pos)
 				dx = ((i_index-1)*a + rand_matrix[j_index, i_index, 1] - (x_pos-1)*a - rand_matrix[x_pos, y_pos, 1])
 				dy = ((j_index-1)*a + rand_matrix[j_index, i_index, 2] - (y_pos-1)*a - rand_matrix[x_pos, y_pos, 2])
-                distance = (sqrt(dx^2 + dy^2))
+				distance = (sqrt(dx^2 + dy^2))
 				if direction == "xx"
 					result += 3 * dx^2 * distance^(-5) + distance^(-3)
 				elseif direction == "xy" || direction == "yx"
@@ -66,40 +66,40 @@ function sum_of_distances(M::Float64, Ω::Float64, C_3::Float64, i_index::Int, j
 				elseif direction == "yy"
 					result += 3 * dy^2 * distance^(-5) + distance^(-3)
 				end
-            end
-        end
-    end
-    return result
+			end
+		end
+	end
+	return result
 end
 
 function calculate_matrix2d(N_x::Int, N_y::Int, M::Float64, Ω::Float64, C_3::Float64, a::Float64, rand_rng::Float64)
 	rand_matrix = 2 * rand_rng * rand(Float16, N_x, N_y, 2) .- rand_rng
-    result_matrix_diag = [zeros(2, 2) for _ in 1:N_x*N_y, _ in 1:N_x*N_y] #zeros(Float64, N_x*N_y, N_x*N_y)
+	result_matrix_diag = [zeros(2, 2) for _ in 1:N_x*N_y, _ in 1:N_x*N_y] #zeros(Float64, N_x*N_y, N_x*N_y)
 	#creating matrix of 2x2 matrices of 0.0
-    diag_ind = 1
-    for i in 1:N_x
-        for j in 1:N_y
-            result_matrix_diag[diag_ind, diag_ind] = matrix_diag_elem(M, Ω, C_3, i, j, N_x, N_y, a, rand_matrix)
-            diag_ind += 1
-        end
-    end
+	diag_ind = 1
+	for i in 1:N_x
+		for j in 1:N_y
+			result_matrix_diag[diag_ind, diag_ind] = matrix_diag_elem(M, Ω, C_3, i, j, N_x, N_y, a, rand_matrix)
+			diag_ind += 1
+		end
+	end
 	result_matrix_diag = reduce(vcat, map(row -> reduce(hcat, row), eachrow(result_matrix_diag)))
 	#making a big matrix from matrix of matrices
 	#return result_matrix_diag #DEL
 
-    result_matrix_upper = [zeros(2, 2) for _ in 1:N_x*N_y, _ in 1:N_x*N_y] #zeros(Float64, N_x*N_y, N_x*N_y)
-    for row_index in 1:N_x * N_y
-        i, j = divrem(row_index - 1, N_x)
-        i += 1
-        j += 1
-        for col_index in (row_index + 1):(N_x * N_y)
-            k, l = divrem(col_index - 1, N_x)
-            k += 1
-            l += 1
+	result_matrix_upper = [zeros(2, 2) for _ in 1:N_x*N_y, _ in 1:N_x*N_y] #zeros(Float64, N_x*N_y, N_x*N_y)
+	for row_index in 1:N_x * N_y
+		i, j = divrem(row_index - 1, N_x)
+		i += 1
+		j += 1
+		for col_index in (row_index + 1):(N_x * N_y)
+			k, l = divrem(col_index - 1, N_x)
+			k += 1
+			l += 1
 			dx = (i-1)*a + rand_matrix[j, i, 1] - (k-1)*a - rand_matrix[l, k, 1]
 			dy = (j-1)*a + rand_matrix[j, i, 2] - (l-1)*a - rand_matrix[l, k, 2]
-            dist = sqrt(dx^2 + dy^2)
-            #result_matrix_upper[row_index, col_index] = dist^(-5)
+			dist = sqrt(dx^2 + dy^2)
+			#result_matrix_upper[row_index, col_index] = dist^(-5)
 			M_xx = -3*C_3*sum_of_distances(M, Ω, C_3, k, l, N_x, N_y, a, rand_matrix, "xx")
 			M_xy = -3*C_3*sum_of_distances(M, Ω, C_3, k, l, N_x, N_y, a, rand_matrix, "xy")
 			M_yy = -3*C_3*sum_of_distances(M, Ω, C_3, k, l, N_x, N_y, a, rand_matrix, "yy")
@@ -108,11 +108,11 @@ function calculate_matrix2d(N_x::Int, N_y::Int, M::Float64, Ω::Float64, C_3::Fl
 			#M_yy = -3 * (dy^2 * dist^(-5) + dist^(-3))
 			result_matrix_upper[row_index, col_index] =  [M_xx M_xy; M_xy M_yy]
 			#println("[col, row] = [$col_index, $row_index]\t[i,j] = [$i,$j]\t[k,l]=[$k,$l]")
-        end
-    end
+		end
+	end
 	result_matrix_upper = reduce(vcat, map(row -> reduce(hcat, row), eachrow(result_matrix_upper)))
 	#display(result_matrix_upper)
-    return result_matrix_diag .+ result_matrix_upper .+ transpose(result_matrix_upper)
+	return result_matrix_diag .+ result_matrix_upper .+ transpose(result_matrix_upper)
 
 end
 ################################################################################

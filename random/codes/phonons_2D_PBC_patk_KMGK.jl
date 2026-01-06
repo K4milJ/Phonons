@@ -79,26 +79,26 @@ function sum_over_entire_lattice_Rn(N_x::Int, N_y::Int, a::Float64, q_x::Float64
 end
 
 function generate_k_path(a::Real, nseg::Integer)
-    # Define points
-    K = [π / a, 0.0]
-    M = [π / a, π / a]
-    Γ = [0.0, 0.0]
+	# Define points
+	K = [π / a, 0.0]
+	M = [π / a, π / a]
+	Γ = [0.0, 0.0]
 
-    # Helper for linear interpolation between two points
-    function segment(p1, p2, n)
-        return [p1 .* (1 - t) + p2 .* t for t in range(0, 1, length=n+1)]
-    end
+	# Helper for linear interpolation between two points
+	function segment(p1, p2, n)
+		return [p1 .* (1 - t) + p2 .* t for t in range(0, 1, length=n+1)]
+	end
 
-    # Segments
-    path_KM = segment(K, M, nseg)
-    path_MG = segment(M, Γ, nseg)
-    path_GK = segment(Γ, K, nseg)
+	# Segments
+	path_KM = segment(K, M, nseg)
+	path_MG = segment(M, Γ, nseg)
+	path_GK = segment(Γ, K, nseg)
 
-    # Concatenate (avoid duplicate points at junctions)
-    path = vcat(path_KM[1:end-1], path_MG[1:end-1], path_GK)
+	# Concatenate (avoid duplicate points at junctions)
+	path = vcat(path_KM[1:end-1], path_MG[1:end-1], path_GK)
 
-    # Convert to 2xN matrix
-    return hcat(path...)
+	# Convert to 2xN matrix
+	return hcat(path...)
 end
 
 ### matrix elements ###
@@ -166,13 +166,13 @@ xticks_pos = [dq[1], dq[nseg+1], dq[2nseg+1], dq[end]]
 xticks_labels = ["K", "M", "Γ", "K"]
 
 Plots.plot(dq, bands', xlabel="k-path", ylabel="Eigenvalues Re()", label="", lw=2,
-     xticks=(xticks_pos, xticks_labels), title="Band structure along high-symmetry path", color=:blue)
+	 xticks=(xticks_pos, xticks_labels), title="Band structure along high-symmetry path", color=:blue)
 
 Plots.plot(dq, bandsi', xlabel="k-path", ylabel="Eigenvalues Im()", label="", lw=2,
-     xticks=(xticks_pos, xticks_labels), title="Band structure along high-symmetry path", color=:orange)
+	 xticks=(xticks_pos, xticks_labels), title="Band structure along high-symmetry path", color=:orange)
 
 Plots.plot(dq, bandabs', xlabel="k-path", ylabel="Eigenvalues abs()", label="", lw=2,
-     xticks=(xticks_pos, xticks_labels), title="Band structure along high-symmetry path", color=:green)
+	 xticks=(xticks_pos, xticks_labels), title="Band structure along high-symmetry path", color=:green)
 
 #################################################################
 #################################################################
@@ -207,15 +207,15 @@ function shortest_distance_2D_PBC(atom1::Tuple{Int, Int},
 end
 
 function sum_of_distances_diag_elem(M::Float64, Ω::Float64, C_3::Float64, i_index::Int, j_index::Int, N_x::Int, N_y::Int, a::Float64, direction::String)
-    result = 0
-    for x_pos in 1:N_x
-        for y_pos in 1:N_y
-            if (i_index != x_pos && j_index != y_pos)
+	result = 0
+	for x_pos in 1:N_x
+		for y_pos in 1:N_y
+			if (i_index != x_pos && j_index != y_pos)
 				dx = shortest_distance_1D_PBC(i_index, x_pos, N_x, a)
 				#((i_index-1)*a - (x_pos-1)*a)
 				dy = shortest_distance_1D_PBC(j_index, y_pos, N_y, a)
 				#((j_index-1)*a - (y_pos-1)*a)
-                distance = (sqrt(dx^2 + dy^2))
+				distance = (sqrt(dx^2 + dy^2))
 				if direction == "xx"
 					result += -6 * dx^2 * distance^(-5) + distance^(-3)
 				elseif direction == "xy" || direction == "yx"
@@ -223,29 +223,29 @@ function sum_of_distances_diag_elem(M::Float64, Ω::Float64, C_3::Float64, i_ind
 				elseif direction == "yy"
 					result += -6 * dy^2 * distance^(-5) + distance^(-3)
 				end
-            end
-        end
-    end
-    return result
+			end
+		end
+	end
+	return result
 end
 
 function matrix_diag_elem(M::Float64, Ω::Float64, C_3::Float64, i_index::Int, j_index::Int, N_x::Int, N_y::Int, a::Float64)
-    M_xx = M*Ω^2 - 3*C_3*sum_of_distances_diag_elem(M, Ω, C_3, i_index, j_index, N_x, N_y, a, "xx")
+	M_xx = M*Ω^2 - 3*C_3*sum_of_distances_diag_elem(M, Ω, C_3, i_index, j_index, N_x, N_y, a, "xx")
 	M_xy = M*Ω^2 - 3*C_3*sum_of_distances_diag_elem(M, Ω, C_3, i_index, j_index, N_x, N_y, a, "xy")
 	M_yy = M*Ω^2 - 3*C_3*sum_of_distances_diag_elem(M, Ω, C_3, i_index, j_index, N_x, N_y, a, "yy")
 	return [M_xx M_xy; M_xy M_yy]
 end
 
 function sum_of_distances(M::Float64, Ω::Float64, C_3::Float64, i_index::Int, j_index::Int, N_x::Int, N_y::Int, a::Float64, direction::String)
-    result = 0
-    for x_pos in 1:N_x
-        for y_pos in 1:N_y
-            if (i_index != x_pos && j_index != y_pos)
+	result = 0
+	for x_pos in 1:N_x
+		for y_pos in 1:N_y
+			if (i_index != x_pos && j_index != y_pos)
 				dx = shortest_distance_1D_PBC(i_index, x_pos, N_x, a)
 				#((i_index-1)*a - (x_pos-1)*a)
 				dy = shortest_distance_1D_PBC(j_index, y_pos, N_y, a)
 				#((j_index-1)*a - (y_pos-1)*a)
-                distance = (sqrt(dx^2 + dy^2))
+				distance = (sqrt(dx^2 + dy^2))
 				if direction == "xx"
 					result += 3 * dx^2 * distance^(-5) + distance^(-3)
 				elseif direction == "xy" || direction == "yx"
@@ -253,39 +253,39 @@ function sum_of_distances(M::Float64, Ω::Float64, C_3::Float64, i_index::Int, j
 				elseif direction == "yy"
 					result += 3 * dy^2 * distance^(-5) + distance^(-3)
 				end
-            end
-        end
-    end
-    return result
+			end
+		end
+	end
+	return result
 end
 
 function calculate_matrix2d_PBC(N_x::Int, N_y::Int, M::Float64, Ω::Float64, C_3::Float64, a::Float64)
-    result_matrix_diag = [zeros(2, 2) for _ in 1:N_x*N_y, _ in 1:N_x*N_y] #zeros(Float64, N_x*N_y, N_x*N_y)
+	result_matrix_diag = [zeros(2, 2) for _ in 1:N_x*N_y, _ in 1:N_x*N_y] #zeros(Float64, N_x*N_y, N_x*N_y)
 	#creating matrix of 2x2 matrices of 0.0
-    diag_ind = 1
-    for i in 1:N_x
-        for j in 1:N_y
-            result_matrix_diag[diag_ind, diag_ind] = matrix_diag_elem(M, Ω, C_3, i, j, N_x, N_y, a)
-            diag_ind += 1
-        end
-    end
+	diag_ind = 1
+	for i in 1:N_x
+		for j in 1:N_y
+			result_matrix_diag[diag_ind, diag_ind] = matrix_diag_elem(M, Ω, C_3, i, j, N_x, N_y, a)
+			diag_ind += 1
+		end
+	end
 	result_matrix_diag = reduce(vcat, map(row -> reduce(hcat, row), eachrow(result_matrix_diag)))
 	#making a big matrix from matrix of matrices
 	#return result_matrix_diag #DEL
 
-    result_matrix_upper = [zeros(2, 2) for _ in 1:N_x*N_y, _ in 1:N_x*N_y] #zeros(Float64, N_x*N_y, N_x*N_y)
-    for row_index in 1:N_x * N_y
-        i, j = divrem(row_index - 1, N_x)
-        i += 1
-        j += 1
-        for col_index in (row_index + 1):(N_x * N_y)
-            k, l = divrem(col_index - 1, N_x)
-            k += 1
-            l += 1
+	result_matrix_upper = [zeros(2, 2) for _ in 1:N_x*N_y, _ in 1:N_x*N_y] #zeros(Float64, N_x*N_y, N_x*N_y)
+	for row_index in 1:N_x * N_y
+		i, j = divrem(row_index - 1, N_x)
+		i += 1
+		j += 1
+		for col_index in (row_index + 1):(N_x * N_y)
+			k, l = divrem(col_index - 1, N_x)
+			k += 1
+			l += 1
 			dx = (i-1)*a - (k-1)*a
 			dy = (j-1)*a - (l-1)*a
-            dist = sqrt(dx^2 + dy^2)
-            #result_matrix_upper[row_index, col_index] = dist^(-5)
+			dist = sqrt(dx^2 + dy^2)
+			#result_matrix_upper[row_index, col_index] = dist^(-5)
 			M_xx = -3*C_3*sum_of_distances(M, Ω, C_3, k, l, N_x, N_y, a, "xx")
 			M_xy = -3*C_3*sum_of_distances(M, Ω, C_3, k, l, N_x, N_y, a, "xy")
 			M_yy = -3*C_3*sum_of_distances(M, Ω, C_3, k, l, N_x, N_y, a, "yy")
@@ -294,11 +294,11 @@ function calculate_matrix2d_PBC(N_x::Int, N_y::Int, M::Float64, Ω::Float64, C_3
 			#M_yy = -3 * (dy^2 * dist^(-5) + dist^(-3))
 			result_matrix_upper[row_index, col_index] =  [M_xx M_xy; M_xy M_yy]
 			#println("[col, row] = [$col_index, $row_index]\t[i,j] = [$i,$j]\t[k,l]=[$k,$l]")
-        end
-    end
+		end
+	end
 	result_matrix_upper = reduce(vcat, map(row -> reduce(hcat, row), eachrow(result_matrix_upper)))
 	#display(result_matrix_upper)
-    return result_matrix_diag .+ result_matrix_upper .+ transpose(result_matrix_upper)
+	return result_matrix_diag .+ result_matrix_upper .+ transpose(result_matrix_upper)
 
 end
 ################################################################################
